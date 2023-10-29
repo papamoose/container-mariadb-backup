@@ -1,6 +1,9 @@
 name: Build all docker images
 
 on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '0 3 * * *'
   pull_request:
     branches:
     - "main"
@@ -55,7 +58,7 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            ghcr.io/papamoose/container-systemd-ubuntu-2204
+            ghcr.io/papamoose/container-mariadb-backup
           # generate Docker tags based on the following events/attributes
           tags: |
             type=semver,pattern={{version}}
@@ -66,8 +69,8 @@ jobs:
             type=raw,value=latest,enable=${{ github.event_name == 'release' }}
           labels: |
             maintainer=papamoose
-            org.opencontainers.image.title=ubuntu-2204
-            org.opencontainers.image.description=Ubuntu 22.04 container running systemd
+            org.opencontainers.image.title=Backup MariaDB
+            org.opencontainers.image.description=Alpine with cron to run mysqldump
             org.opencontainers.image.vendor=Papamoose Co
 
       - name: Build and push
@@ -75,7 +78,7 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          file: Dockerfile.ubuntu.2204
+          file: Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
